@@ -57,7 +57,7 @@ def setGlobalVars():
         logger.error('ERROR: {0}'.format( str(e) ) )
 
 """
-This function creates an AMI of all EC2 instances having a tag "AMIBackUp=Yes"
+This function creates an AMI of *all* EC2 instances having a tag "AMIBackUp=Yes"
 """
 def amiBakerBot():
 
@@ -106,7 +106,7 @@ def amiBakerBot():
                 NameTxt = 'AMI-for-' + str(instance['InstanceId']) + '-' + datetime.datetime.now().strftime('%Y-%m-%d_%-H-%M')
 
         # Find all the blockdevices attached to the instance
-        _BlockDeviceMappings=[]
+        _BlockDeviceMappings = []
         for blk in instance['BlockDeviceMappings']:
             _BlockDeviceMappings.append({
                 "DeviceName": blk['DeviceName'],
@@ -126,7 +126,8 @@ def amiBakerBot():
             response = ec2_client.create_image(InstanceId = instance['InstanceId'],
                                                Name = NameTxt,
                                                Description  = 'AMI-for-' + str(instance['InstanceId']) + '-' + datetime.datetime.now().strftime('%Y-%m-%d_%-H-%M'),
-                                               BlockDeviceMappings = _BlockDeviceMappings,
+                                               # ToDo: Not able to get only the additional disk in device mappsings
+                                               # BlockDeviceMappings = _BlockDeviceMappings,
                                                NoReboot = True
                                                )
 
@@ -141,6 +142,7 @@ def amiBakerBot():
             # Add additional tags
             instance['Tags'].append( { 'Key': globalVars['RetentionTag'], 'Value': delete_fmt } )
             instance['Tags'].append( { 'Key': 'ReplicateAMI', 'Value': globalVars['ReplicateAMI'] } )
+            instance['Tags'].append( { 'Key': 'OriginalInstanceID', 'Value': instance['InstanceId']})
             
             # Prepare return message
             imagesBaked['Images'].append({'InstanceId':instance['InstanceId'], 
