@@ -61,9 +61,8 @@ The below script is written in `Python 3.6`. Remember to choose the same in AWS 
   
   - `globalVars['ReplicateAMI']` - If you want to use my _Serverless AMI Replicator_
 
-  - If you have a lot of Instances, then consider increasing the lambda run time, the default is `3` seconds.
 - `Copy` the code from `serverless-ami-backup.py` in this repo to the lambda function
-
+  - If you have a lot of Instances, then consider increasing the lambda run time, the default is `3` seconds.
  - `Save` the lambda function
 
 ## Step 2 - Configure Lambda Triggers
@@ -83,7 +82,7 @@ _If you want to learn more about the above Scheduled expressions,_ Ref: [CloudWa
 Start few Instance with the Tag Key`AmiBackUp` with Value as `Yes`
 
 ### Summary
-We have demonstrated how you can automatically identify and delete old and unused EBS Snapshots.
+We have demonstrated how you can automatically identify instances that require AMI Backup, create AMIs and tag them.
 
 ### Next Steps
 You can use a serverless mechanism to replicate the AMI across Regions for Disaster Recovery. [Have a look at this video](https://www.youtube.com/watch?v=iujwfIPoEiM&list=PLxzKY3wu0_FKok5gI1v4g4S-g-PLaW9YD&index=3)
