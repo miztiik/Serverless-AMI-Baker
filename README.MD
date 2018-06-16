@@ -1,7 +1,8 @@
 # Serverless AMI Baker
 An Amazon Machine Image (AMI) provides the information required to launch an instance, which is a virtual server in the cloud.
 You can launch multiple instances from a single AMI when you need multiple instances with the same configuration. You can use different AMIs to launch instances when you need instances with different configurations.
-![Fig : Serverless-Event-Driven-AMI-Creation](https://raw.githubusercontent.com/miztiik/serverless-janitor-ebs-snapshots/master/images/serverless-janitor-ebs-snapshots.png)
+![Fig : Serverless-Event-Driven-AMI-Creation](https://raw.githubusercontent.com/miztiik/Serverless-AMI-Baker/master/images/Serverless-Event-Driven-AMI-Creation.png)
+This lambda function will create AMI(Amazon Machine Images) of your instances and tag them for replication or auto deletion. You can customize it to make images of only your `running` instances.
 
 You can also follow this article in **[Youtube]()**
 
