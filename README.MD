@@ -4,7 +4,7 @@ You can launch multiple instances from a single AMI when you need multiple insta
 ![Fig : Serverless-Event-Driven-AMI-Creation](https://raw.githubusercontent.com/miztiik/Serverless-AMI-Baker/master/images/Serverless-Event-Driven-AMI-Creation.png)
 This lambda function will create AMI(Amazon Machine Images) of your instances and tag them for replication or auto deletion. You can customize it to make images of only your `running` instances.
 
-You can also follow this article in **[Youtube]()**
+You can also follow this article in **[Youtube](https://www.youtube.com/watch?v=U5nDPagdLPk&t=0s&list=PLxzKY3wu0_FKok5gI1v4g4S-g-PLaW9YD&index=23)**
 
 ## Pre-Requisities
 We will need the following pre-requisites to successfully complete this activity,
