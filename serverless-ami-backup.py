@@ -9,13 +9,13 @@ os.environ['OnlyRunningInstances']
 os.environ['RetentionDays']
 """
 globalVars  = {}
-globalVars['Owner']                 = "Miztiik"
-globalVars['Environment']           = "Test"
-globalVars['REGION_NAME']           = "eu-central-1"
-globalVars['tagName']               = "Serverless-AMI-Baker-Bot"
-globalVars['findNeedle']            = "AmiBackUp"
+globalVars['Owner']                 = "Sogeti"
+globalVars['Environment']           = "Shared Services"
+globalVars['REGION_NAME']           = "eu-Web-1"
+globalVars['tagName']               = "SOGETI_SS_EU_WEST_1_BACKUP_AMI"
+globalVars['findNeedle']            = "Backup-AMI"
 globalVars['ReplicateAMI']          = "No"
-globalVars['RetentionTag']          = "DeleteOn"
+globalVars['RetentionTag']          = "Retention-AMI"
 globalVars['RetentionDays']         = "30"
 globalVars['OnlyRunningInstances']  = "No"
 
@@ -48,8 +48,8 @@ def setGlobalVars():
     try:
         if os.environ['ReplicateAMI']:
             globalVars['ReplicateAMI']  = os.environ['ReplicateAMI']
-        if os.environ['RetentionDays']:
-            globalVars['RetentionDays'] = os.environ['RetentionDays']
+        if os.environ['RetentionTag']:
+            globalVars['RetentionTag'] = os.environ['RetentionTag']
         if os.environ['OnlyRunningInstances']:
             globalVars['OnlyRunningInstances']  = os.environ['OnlyRunningInstances']
     except KeyError as e:
@@ -57,7 +57,7 @@ def setGlobalVars():
         logger.error('ERROR: {0}'.format( str(e) ) )
 
 """
-This function creates an AMI of *all* EC2 instances having a tag "AMIBackUp=Yes"
+This function creates an AMI of *all* EC2 instances having a tag "Backup-AMI=Yes"
 """
 def amiBakerBot():
 
