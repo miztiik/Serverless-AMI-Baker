@@ -54,36 +54,49 @@ def _aws_tags_to_dict(aws_tags):
 
 """
 If User provides different values, override defaults
+Precedence is: vars from cloudwatch event JSON, vars from Lambda environment variables, default static vars
 """
-def setGlobalVars():
+def setGlobalVars(event):
     try:
-        if os.environ['ReplicateAMI']:
+        if event['ReplicateAMI']:
+            globalVars['ReplicateAMI']  = event['ReplicateAMI']
+        elif os.environ['ReplicateAMI']:
             globalVars['ReplicateAMI']  = os.environ['ReplicateAMI']
     except KeyError as e:
         logger.error("User Customization Environment variables are not set")
         logger.error('ERROR: {0}'.format( str(e) ) )
 
     try:
-        if os.environ['RetentionDays']:
+        if event['RetentionDays']:
+            globalVars['RetentionDays'] = event['RetentionDays']
+        elif os.environ['RetentionDays']:
             globalVars['RetentionDays'] = os.environ['RetentionDays']
     except KeyError as e:
         logger.error("User Customization Environment variables are not set")
         logger.error('ERROR: {0}'.format( str(e) ) )
 
     try:
-        if os.environ['OnlyRunningInstances']:
+        if event['OnlyRunningInstances']:
+            globalVars['OnlyRunningInstances'] = event['OnlyRunningInstances']
+        elif os.environ['OnlyRunningInstances']:
             globalVars['OnlyRunningInstances']  = os.environ['OnlyRunningInstances']
     except KeyError as e:
         logger.error("User Customization Environment variables are not set")
         logger.error('ERROR: {0}'.format( str(e) ) )
+
     try:
-        if os.environ['findNeedle']:
+        if event['findNeedle']:
+            globalVars['findNeedle'] = event['findNeedle']
+        elif os.environ['findNeedle']:
             globalVars['findNeedle']  = os.environ['findNeedle']
     except KeyError as e:
         logger.error("User Customization Environment variables are not set")
         logger.error('ERROR: {0}'.format( str(e) ) )
+
     try:
-        if os.environ['SNSTopicArn']:
+        if event['SNSTopicArn']:
+            globalVars['SNSTopicArn'] = event['SNSTopicArn']
+        elif os.environ['SNSTopicArn']:
             globalVars['SNSTopicArn']  = os.environ['SNSTopicArn']
     except KeyError as e:
         logger.error('ERROR: SNS Topic ARN is missing, Using default - {0}'.format( str(e) ) )
@@ -239,7 +252,7 @@ def push_to_sns(imagesBaked):
 
 def lambda_handler(event, context):
     
-    setGlobalVars()
+    setGlobalVars(event)
 
     bakerResults = amiBakerBot()
 
