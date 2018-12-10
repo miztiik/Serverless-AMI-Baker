@@ -20,17 +20,17 @@ globalVars['RetentionDays']         = "30"
 globalVars['OnlyRunningInstances']  = "No"
 globalVars['SNSTopicArn']           = ""
 
-#ToDo Features
+# ToDo Features
 # Accept day of week * / 0,1,2,3,4,5,6
 globalVars['BackUpScheduledDays']   = "AutoDigiBackupSchedule"  
-#//if true then it wont reboot. If not present or set to false then it will reboot.
+# if true then it wont reboot. If not present or set to false then it will reboot.
 globalVars['InstanceTagNoReboot']     = "AutoDigiNoReboot"
 
 
 # Set the log format
 logger = logging.getLogger()
 for h in logger.handlers:
-  logger.removeHandler(h)
+    logger.removeHandler(h)
 
 h = logging.StreamHandler(sys.stdout)
 FORMAT = ' [%(levelname)s]/%(asctime)s/%(name)s - %(message)s'
@@ -160,12 +160,12 @@ def amiBakerBot():
 
         try:
             response = ec2_client.create_image(InstanceId = instance['InstanceId'],
-                                               Name = NameTxt,
-                                               Description  = 'AMI-for-' + str(instance['InstanceId']) + '-' + datetime.datetime.now().strftime('%Y-%m-%d_%-H-%M'),
-                                               # ToDo: Not able to get only the additional disk in device mappings
-                                               # BlockDeviceMappings = _BlockDeviceMappings,
-                                               NoReboot = True
-                                               )
+                                                Name = NameTxt,
+                                                Description  = 'AMI-for-' + str(instance['InstanceId']) + '-' + datetime.datetime.now().strftime('%Y-%m-%d_%-H-%M'),
+                                                # ToDo: Not able to get only the additional disk in device mappings
+                                                # BlockDeviceMappings = _BlockDeviceMappings,
+                                                NoReboot = True
+                                            )
         except Exception as e:
             imagesBaked['FailedAMIs'].append( {'InstanceId':instance['InstanceId'],
                                                 'ERROR':str(e),
@@ -187,11 +187,11 @@ def amiBakerBot():
         logger.info(newTags)
         # Prepare return message
         imagesBaked['Images'].append({'InstanceId':instance['InstanceId'], 
-                                          'DeleteOn': delete_fmt,
-                                          'AMI-ID':response['ImageId'],
-                                          'Tags':newTags['Tags']
-                                          }
-                                         )
+                                        'DeleteOn': delete_fmt,
+                                        'AMI-ID':response['ImageId'],
+                                        'Tags':newTags['Tags']
+                                        }
+                                    )
 
     imagesBaked['Status']['BakedImages'] = len( imagesBaked['Images'] )
 
@@ -204,8 +204,8 @@ def amiBakerBot():
     # Tag all AMIs
     for ami in imagesBaked['Images']:
         ec2_client.create_tags(Resources = [ ami['AMI-ID'] ],
-                               Tags = ami['Tags']
-                               )
+                                Tags = ami['Tags']
+                            )
 
         # Get the Snapshot ID to tag it with metadata
         account_ids = list()
@@ -217,8 +217,8 @@ def amiBakerBot():
                 snapTags =  ami['Tags'][:]
                 snapTags.append( {'Value': 'Snap-for-' + ami['AMI-ID'], 'Key': 'Name'} )
                 ec2_client.create_tags(Resources = [ dev['Ebs']['SnapshotId'] ],
-                           Tags = snapTags
-                           )
+                                        Tags = snapTags
+                                    )
     return imagesBaked
 
 
@@ -236,7 +236,7 @@ def push_to_sns(imagesBaked):
         logger.error('ERROR: Unable to push to SNS Topic: Check [1] SNS Topic ARN is invalid, [2] IAM Role Permissions{0}'.format( str(e) ) )
         logger.error('ERROR: {0}'.format( str(e) ) )
 
-       
+
 def lambda_handler(event, context):
     
     setGlobalVars()
