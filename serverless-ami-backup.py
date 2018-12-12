@@ -8,24 +8,7 @@ Can Override the global variables using Lambda Environment Parameters - Which ca
 os.environ['OnlyRunningInstances']
 os.environ['RetentionDays']
 """
-globalVars  = {}
-globalVars['Owner']                 = "Miztiik"
-globalVars['Environment']           = "Test"
-globalVars['REGION_NAME']           = "eu-central-1"
-globalVars['tagName']               = "Serverless-AMI-Baker-Bot"
-globalVars['findNeedle']            = "AMIBackUp"
-globalVars['ReplicateAMI']          = "No"
-globalVars['RetentionTag']          = "DeleteOn"
-globalVars['RetentionDays']         = "30"
-globalVars['OnlyRunningInstances']  = "No"
-globalVars['SNSTopicArn']           = ""
-
-# ToDo Features
-# Accept day of week * / 0,1,2,3,4,5,6
-globalVars['BackUpScheduledDays']   = "AutoDigiBackupSchedule"  
-# if true then it wont reboot. If not present or set to false then it will reboot.
-globalVars['InstanceTagNoReboot']     = "AutoDigiNoReboot"
-
+globalVars = {}
 
 # Set the log format
 logger = logging.getLogger()
@@ -38,8 +21,7 @@ h.setFormatter(logging.Formatter(FORMAT))
 logger.addHandler(h)
 logger.setLevel(logging.INFO)
 
-# ec2_client = boto3.client('ec2',region_name=globalVars['REGION_NAME'])
-ec2_client = boto3.client('ec2')
+
 
 
 def boolval(v):
@@ -53,66 +35,46 @@ def _aws_tags_to_dict(aws_tags):
 
 
 """
-If User provides different values, override defaults
-Precedence is: vars from cloudwatch event JSON, vars from Lambda environment variables, default static vars
+If User provides different values via event JSON, override defaults
 """
 def setGlobalVars(event):
-    try:
-        if event['ReplicateAMI']:
-            globalVars['ReplicateAMI']  = event['ReplicateAMI']
-        elif os.environ['ReplicateAMI']:
-            globalVars['ReplicateAMI']  = os.environ['ReplicateAMI']
-    except KeyError as e:
-        logger.error("User Customization Environment variables are not set")
-        logger.error('ERROR: {0}'.format( str(e) ) )
+
+    # ToDo Features
+    # Accept day of week * / 0,1,2,3,4,5,6
+    globalVars['BackUpScheduledDays'] = "AutoDigiBackupSchedule"
+    # if true then it wont reboot. If not present or set to false then it will reboot.
+    globalVars['InstanceTagNoReboot'] = "AutoDigiNoReboot"
 
     try:
-        if event['RetentionDays']:
-            globalVars['RetentionDays'] = event['RetentionDays']
-        elif os.environ['RetentionDays']:
-            globalVars['RetentionDays'] = os.environ['RetentionDays']
-    except KeyError as e:
-        logger.error("User Customization Environment variables are not set")
-        logger.error('ERROR: {0}'.format( str(e) ) )
+        globalVars['Owner'] = event.get('Owner', "Miztiik")
+        globalVars['Environment'] = event.get('Environment', "Test")
+        globalVars['REGION_NAME'] = event.get('REGION_NAME', "eu-central-1")
+        globalVars['tagName'] = event.get('tagName', "Serverless-AMI-Baker-Bot")
+        globalVars['findNeedle'] = event.get('findNeedle', "AMIBackUp")
+        globalVars['ReplicateAMI'] = event.get('ReplicateAMI', "No")
+        globalVars['RetentionTag'] = event.get('RetentionTag', "DeleteOn")
+        globalVars['RetentionDays'] = event.get('RetentionDays', "30")
+        globalVars['OnlyRunningInstances'] = event.get('OnlyRunningInstances', "No")
+        globalVars['SNSTopicArn'] = event.get('SNSTopicArn', "")
+    except Exception as e:
+        logger.error("ERROR: problem setting globalVars - {0}".format( str(e) ) )
 
-    try:
-        if event['OnlyRunningInstances']:
-            globalVars['OnlyRunningInstances'] = event['OnlyRunningInstances']
-        elif os.environ['OnlyRunningInstances']:
-            globalVars['OnlyRunningInstances']  = os.environ['OnlyRunningInstances']
-    except KeyError as e:
-        logger.error("User Customization Environment variables are not set")
-        logger.error('ERROR: {0}'.format( str(e) ) )
-
-    try:
-        if event['findNeedle']:
-            globalVars['findNeedle'] = event['findNeedle']
-        elif os.environ['findNeedle']:
-            globalVars['findNeedle']  = os.environ['findNeedle']
-    except KeyError as e:
-        logger.error("User Customization Environment variables are not set")
-        logger.error('ERROR: {0}'.format( str(e) ) )
-
-    try:
-        if event['SNSTopicArn']:
-            globalVars['SNSTopicArn'] = event['SNSTopicArn']
-        elif os.environ['SNSTopicArn']:
-            globalVars['SNSTopicArn']  = os.environ['SNSTopicArn']
-    except KeyError as e:
-        logger.error('ERROR: SNS Topic ARN is missing, Using default - {0}'.format( str(e) ) )
 
 """
 This function creates an AMI of *all* EC2 instances having a tag "AMIBackUp=Yes"
 """
 def amiBakerBot():
 
+    # ec2_client = boto3.client('ec2',region_name=globalVars['REGION_NAME'])
+    ec2_client = boto3.client('ec2')
+
     imagesBaked = { 'Images':[], 'FailedAMIs':[], 'Status':{} }
 
     # Filter for instances having the needle tag
-    FILTER_1 = {'Name': 'tag:' + globalVars['findNeedle'],  'Values': ['true','YES', 'Yes', 'yes']}
+    FILTER_1 = {'Name': 'tag:' + globalVars.get('findNeedle'),  'Values': ['true','YES', 'Yes', 'yes']}
 
     # Filter only for running instances
-    if globalVars['OnlyRunningInstances'] and globalVars['OnlyRunningInstances'] in ('true', 'YES', 'Yes', 'yes'):
+    if globalVars.get('OnlyRunningInstances', 'No') in ('true', 'YES', 'Yes', 'yes'):
         FILTER_2 = {'Name': 'instance-state-name', 'Values': ['running']}
     else:
         FILTER_2 = {'Name': 'instance-state-name', 'Values': ['running','stopped']}
@@ -134,12 +96,8 @@ def amiBakerBot():
             retention_days = [
                 int(t.get('Value')) for t in instance['Tags']
                 if t['Key'] == 'RetentionDays'][0]
-        except IndexError:
-            retention_days = int(globalVars['RetentionDays'])
-        except ValueError:
-            retention_days = int(globalVars['RetentionDays'])
-        except Exception as e:
-            retention_days = int(globalVars['RetentionDays'])
+        except (IndexError, ValueError, Exception) as e:
+            retention_days = int(globalVars.get('RetentionDays'))
 
         # Add additional tags
         newTags = {'Tags':[]}
@@ -193,9 +151,9 @@ def amiBakerBot():
         delete_date = datetime.date.today() + datetime.timedelta(days=retention_days)
         delete_fmt = delete_date.strftime('%Y-%m-%d')
 
-        newTags['Tags'].append( { 'Key': globalVars['RetentionTag'], 'Value': delete_fmt } )
-        newTags['Tags'].append( { 'Key': 'ReplicateAMI', 'Value': globalVars['ReplicateAMI'] } )
-        newTags['Tags'].append( { 'Key': 'OriginalInstanceID', 'Value': instance['InstanceId']})
+        newTags['Tags'].append( { 'Key': globalVars.get('RetentionTag'), 'Value': delete_fmt } )
+        newTags['Tags'].append( { 'Key': 'ReplicateAMI', 'Value': globalVars.get('ReplicateAMI') } )
+        newTags['Tags'].append( { 'Key': 'OriginalInstanceID', 'Value': instance['InstanceId'] } )
 
         logger.info(newTags)
         # Prepare return message
@@ -215,7 +173,7 @@ def amiBakerBot():
     else:
         imagesBaked['Status']['Description'] = 'Failed, More Images'
     # Tag all AMIs
-    for ami in imagesBaked['Images']:
+    for ami in imagesBaked.get('Images'):
         ec2_client.create_tags(Resources = [ ami['AMI-ID'] ],
                                 Tags = ami['Tags']
                             )
@@ -239,7 +197,7 @@ def push_to_sns(imagesBaked):
     sns_client = boto3.client('sns')
     try:
         response = sns_client.publish(
-        TopicArn = globalVars['SNSTopicArn'],
+        TopicArn = globalVars.get('SNSTopicArn'),
         Message = json.dumps(imagesBaked),
         Subject = imagesBaked['Status']['Description']
         )
@@ -256,7 +214,7 @@ def lambda_handler(event, context):
 
     bakerResults = amiBakerBot()
 
-    if globalVars['SNSTopicArn']:
+    if globalVars.get('SNSTopicArn'):
         push_to_sns(bakerResults)
 
     return bakerResults
