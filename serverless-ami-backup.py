@@ -136,6 +136,11 @@ def amiBakerBot():
                                                 # ToDo: Not able to get only the additional disk in device mappings
                                                 # BlockDeviceMappings = _BlockDeviceMappings,
                                                 NoReboot = True
+            #Wait for AMI to be available. 
+            logger.info("before waiter")
+            waiter = ec2_client.get_waiter('image_available')
+            waiter.wait(Filters=[{'Name':'image-id','Values':[response['ImageId']]}])
+            logger.info("after waiter")
                                             )
         except Exception as e:
             imagesBaked['FailedAMIs'].append( {'InstanceId':instance['InstanceId'],
