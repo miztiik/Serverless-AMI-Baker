@@ -52,7 +52,7 @@ _The image above shows the execution order, that should not be confused with the
 ```
 
 ## Step 1 - Configure Lambda Function- `Serverless Janitor`
-The below script is written in `Python 3.6`. Remember to choose the same in AWS Lambda Functions.
+The below script is written in `Python 3.8`. Remember to choose the same in AWS Lambda Functions.
 ### Customisations
 - _Change the global variables at the top of the script to suit your needs._
   - `globalVars['findNeedle']` - My Instances have tag `AmiBackUp`,
