@@ -136,12 +136,12 @@ def amiBakerBot():
                                                 # ToDo: Not able to get only the additional disk in device mappings
                                                 # BlockDeviceMappings = _BlockDeviceMappings,
                                                 NoReboot = True
+                                             )
             #Polls EC2.Client.describe_images() every 15 seconds until a successful state is reached. An error is returned after 40 failed checks.
             logger.info("Waiting for AMI "+response['ImageId']+" to be available")
             waiter = ec2_client.get_waiter('image_available')
             waiter.wait(Filters=[{'Name':'image-id','Values':[response['ImageId']]}])
             logger.info(f'{{ "image_id" : "{ response["ImageId"] }", "completed_backup": True }}')
-                                            )
         except Exception as e:
             imagesBaked['FailedAMIs'].append( {'InstanceId':instance['InstanceId'],
                                                 'ERROR':str(e),
