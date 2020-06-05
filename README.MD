@@ -62,8 +62,8 @@ The below script is written in `Python 3.6`. Remember to choose the same in AWS 
   - `globalVars['ReplicateAMI']` - If you want to use my _Serverless AMI Replicator_
 
 - `Copy` the code from `serverless-ami-backup.py` in this repo to the lambda function
-- `Increase` the lambda timeout acording to the number of instances and the size of each EBS volume. You could start with `60` seconds and then increasing or decreasing it based on your results, the default is `3` seconds.
-- `Disable` retry attempts on asynchronous invocation (configure `maximum-retry-attempts` to 0). The default value is `2` , but is not recommended to this function because of his lack of idempotence.
+- `Increase` the lambda timeout according to the number of instances and the size of each EBS volume. You could start with `60` seconds and then increase or decrease it based on your results, the default is `3` seconds.
+- `Disable` retry attempts on asynchronous invocation (configure `maximum-retry-attempts` to `0`). The default value is `2` , but is not recommended to this function because of the lack of idempotence.
 - `Save` the lambda function
 
 ## Step 2 - Configure Lambda Triggers
