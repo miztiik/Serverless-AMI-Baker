@@ -1,7 +1,7 @@
 # Serverless AMI Baker
 An Amazon Machine Image (AMI) provides the information required to launch an instance, which is a virtual server in the cloud.
 You can launch multiple instances from a single AMI when you need multiple instances with the same configuration. You can use different AMIs to launch instances when you need instances with different configurations.
-![Fig : Serverless-Event-Driven-AMI-Creation](https://raw.githubusercontent.com/miztiik/Serverless-AMI-Baker/master/images/Serverless-Event-Driven-AMI-Creation.png)
+![Fig : Serverless-Event-Driven-AMI-Creation](images/Serverless-Event-Driven-AMI-Creation.png)
 This lambda function will create AMI(Amazon Machine Images) of your instances and tag them for replication or auto deletion. You can customize it to make images of only your `running` instances.
 
 You can also follow this article in **[Youtube](https://www.youtube.com/watch?v=U5nDPagdLPk&t=0s&list=PLxzKY3wu0_FKok5gI1v4g4S-g-PLaW9YD&index=23)**
@@ -52,7 +52,7 @@ _The image above shows the execution order, that should not be confused with the
 ```
 
 ## Step 1 - Configure Lambda Function- `Serverless Janitor`
-The below script is written in `Python 3.6`. Remember to choose the same in AWS Lambda Functions.
+The below script is written in `Python 3.8`. Remember to choose the same in AWS Lambda Functions.
 ### Customisations
 - _Change the global variables at the top of the script to suit your needs._
   - `globalVars['findNeedle']` - My Instances have tag `AmiBackUp`,
@@ -62,8 +62,9 @@ The below script is written in `Python 3.6`. Remember to choose the same in AWS 
   - `globalVars['ReplicateAMI']` - If you want to use my _Serverless AMI Replicator_
 
 - `Copy` the code from `serverless-ami-backup.py` in this repo to the lambda function
-  - If you have a lot of Instances, then consider increasing the lambda run time, the default is `3` seconds.
- - `Save` the lambda function
+- `Increase` the lambda timeout according to the number of instances and the size of each EBS volume. You could start with `60` seconds and then increase or decrease it based on your results, the default is `3` seconds.
+- `Disable` retry attempts on asynchronous invocation (configure `maximum-retry-attempts` to `0`). The default value is `2` , but is not recommended to this function because of the lack of idempotence.
+- `Save` the lambda function
 
 ## Step 2 - Configure Lambda Triggers
 We are going to use Cloudwatch Scheduled Events to take backup everyday.
